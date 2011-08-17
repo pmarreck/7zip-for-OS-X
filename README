@@ -1,0 +1,12 @@
+PREREQUISITE:
+
+Homebrew should be installed.
+http://mxcl.github.com/homebrew/
+
+Usage:
+
+7zip <file or directory>
+
+If the target is either a directory or an OS X file with metadata attached, it will be TAR'd first (since TAR preserves OS X metadata and 7zip does not).
+
+If you do not have the "p7zip" command installed yet, it will be automatically installed via Homebrew. (You may need to re-run the command after.)
