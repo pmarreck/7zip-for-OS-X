@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# This script will tar and then 7zip any arguments to it. OS X Tar preserves resource forks.
+
+pbz=`which 7za`
+
+if [ -z "$pbz" ]; then
+  echo "You don't seem to have the '7za' binary installed. Installing p7zip via Homebrew..."
+  brew=`which brew`
+  if [ -z "$brew" ]; then
+    echo "You need to install Homebrew first. See: http://mxcl.github.com/homebrew/"
+    exit 0
+  fi
+  $brew install p7zip
+  echo "Please rerun the command again now!"
+  exit 0
+fi
+
+for f in "$@"
+do
+	fout=${f%/}  # strip trailing slash
+	path=${fout%/*} # strip everything after the last slash which includes the filename
+  # if [ -d "$path" ]; then
+  #   cd "$path/"
+  # fi
+	filename=${fout##/*/}  # deletes entire path before last filename, hopefully
+	if [ -f "$f" -a ! -s "$f/..namedfork/rsrc" ]; then # if it's a file and has no (or blank) resource fork, treat it like a file
+		$pbz a -t7z "$filename.7z" "./$filename" -bd -mx=9 -mmt=on #-m0=lzma2
+		echo "$f > $filename.7z" >> /Users/${USER}/7zipcompressedfiles.log
+	else  # assume it's a directory or app package or wonky old mac resource forked file or whatever
+		tar cf "$filename.tar" "./$filename"
+		$pbz a -t7z "$filename.tar.7z" "./$filename.tar" -bd -mx=9
+		rm -f "$filename.tar"
+		echo "$f/ > $filename.tar.7z" >> /Users/${USER}/7zipcompressedfiles.log
+	fi
+done
